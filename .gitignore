@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Build folders
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+# git init
+# git add README.md
+# git commit -m "first commit"
+# git branch -M main
+# git remote add origin https://github.com/Devraj-sah22/password-hubs.git
+# git push -u origin main
