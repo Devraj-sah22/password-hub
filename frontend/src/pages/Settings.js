@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -28,6 +28,37 @@ const Settings = () => {
     autoLock: '5',
     theme: 'dark'
   });
+  // Apply theme change
+  const changeTheme = (mode) => {
+    setSettings(prev => ({ ...prev, theme: mode }));
+    localStorage.setItem("theme", mode);
+
+    if (mode === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+    else if (mode === "light") {
+      document.documentElement.classList.remove("dark");
+    }
+    else {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  };
+
+  // Load saved theme
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    }
+    else if (savedTheme === "light") {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -47,7 +78,7 @@ const Settings = () => {
       const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
         responseType: 'blob'
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -55,7 +86,7 @@ const Settings = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
+
       toast.success('Passwords exported successfully!');
     } catch (error) {
       toast.error('Export failed');
@@ -63,12 +94,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 p-6">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-700"
+          className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-300 dark:border-gray-700"
         >
           <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
 
@@ -215,32 +246,29 @@ const Settings = () => {
             <h2 className="text-xl font-semibold text-white mb-4">Appearance</h2>
             <div className="flex gap-4">
               <button
-                onClick={() => setSettings({...settings, theme: 'dark'})}
-                className={`px-6 py-3 rounded-lg transition-colors ${
-                  settings.theme === 'dark' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                onClick={() => changeTheme('dark')}
+                className={`px-6 py-3 rounded-lg transition-colors ${settings.theme === 'dark'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
               >
                 Dark
               </button>
               <button
-                onClick={() => setSettings({...settings, theme: 'light'})}
-                className={`px-6 py-3 rounded-lg transition-colors ${
-                  settings.theme === 'light' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                onClick={() => changeTheme('light')}
+                className={`px-6 py-3 rounded-lg transition-colors ${settings.theme === 'light'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
               >
                 Light
               </button>
               <button
-                onClick={() => setSettings({...settings, theme: 'system'})}
-                className={`px-6 py-3 rounded-lg transition-colors ${
-                  settings.theme === 'system' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
+                onClick={() => changeTheme('system')}
+                className={`px-6 py-3 rounded-lg transition-colors ${settings.theme === 'system'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
               >
                 System
               </button>
