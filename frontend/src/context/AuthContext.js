@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+axios.defaults.baseURL = "http://localhost:5000";
+
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
@@ -15,18 +17,18 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
-    
+
     if (token && savedUser) {
       setUser(JSON.parse(savedUser));
       axios.defaults.headers.common['x-auth-token'] = token;
     }
-    
+
     setLoading(false);
 
     // Check URL for token from OAuth
     const urlParams = new URLSearchParams(window.location.search);
     const tokenParam = urlParams.get('token');
-    
+
     if (tokenParam) {
       handleAuthSuccess(tokenParam);
       window.history.replaceState({}, document.title, '/');
@@ -36,17 +38,17 @@ export const AuthProvider = ({ children }) => {
   const handleAuthSuccess = (token) => {
     localStorage.setItem('token', token);
     axios.defaults.headers.common['x-auth-token'] = token;
-    
+
     // Decode token to get user info (simplified - you might want to fetch user data)
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(window.atob(base64));
-    
+
     const userData = {
       id: payload.userId,
       email: payload.email
     };
-    
+
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     toast.success('Successfully logged in!');
@@ -55,11 +57,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('/api/auth/login', {
         email,
         password
       });
-      
+
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
@@ -75,12 +77,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post('/api/auth/register', {
         name,
         email,
         password
       });
-      
+
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));

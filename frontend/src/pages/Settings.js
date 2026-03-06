@@ -92,6 +92,31 @@ const Settings = () => {
       toast.error('Export failed');
     }
   };
+  const handleImport = async (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await axios.post(
+        "http://localhost:5000/api/passwords/import/excel",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      toast.success("Passwords imported successfully!");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Import failed");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 p-6">
@@ -101,7 +126,7 @@ const Settings = () => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-300 dark:border-gray-700"
         >
-          <h1 className="text-3xl font-bold text-white mb-8">Settings</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Settings</h1>
 
           {/* Profile Section */}
           <div className="mb-8">
@@ -234,10 +259,16 @@ const Settings = () => {
                 <FiDownload />
                 Export Data
               </button>
-              <button className="flex items-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors">
+              <label className="flex items-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors cursor-pointer">
                 <FiUpload />
                 Import Data
-              </button>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImport}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
 
