@@ -23,7 +23,7 @@ router.get('/', auth, async (req, res) => {
   try {
     const passwords = await Password.find({ userId: req.userId })
       .sort({ favorite: -1, updatedAt: -1 });
-    
+
     const user = await User.findById(req.userId);
     const decryptedPasswords = passwords.map(pwd => {
       const pwdObj = pwd.toObject();
@@ -34,7 +34,7 @@ router.get('/', auth, async (req, res) => {
       }
       return pwdObj;
     });
-    
+
     res.json(decryptedPasswords);
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -55,7 +55,7 @@ router.post('/', [
   try {
     const user = await User.findById(req.userId);
     const encryptedPassword = encrypt(req.body.password, user.encryptionKey);
-    
+
     const password = new Password({
       userId: req.userId,
       title: req.body.title,
@@ -83,7 +83,7 @@ router.put('/:id', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     const updateData = { ...req.body };
-    
+
     if (req.body.password) {
       updateData.encryptedPassword = encrypt(req.body.password, user.encryptionKey);
       delete updateData.password;
@@ -145,9 +145,9 @@ router.get('/export/excel', auth, async (req, res) => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(exportData);
     XLSX.utils.book_append_sheet(wb, ws, 'Passwords');
-    
+
     const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
-    
+
     res.setHeader('Content-Disposition', 'attachment; filename=passwords.xlsx');
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.send(buffer);
@@ -159,6 +159,13 @@ router.get('/export/excel', auth, async (req, res) => {
 // Import from Excel
 router.post('/import/excel', auth, async (req, res) => {
   try {
+    if (!req.files || !req.files.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    if (!req.files.file.name.endsWith(".xlsx")) {
+      return res.status(400).json({ message: "Only Excel files allowed" });
+    }
     const user = await User.findById(req.userId);
     const passwords = [];
 
@@ -169,7 +176,7 @@ router.post('/import/excel', auth, async (req, res) => {
 
     for (const row of data) {
       const encryptedPassword = encrypt(row.Password, user.encryptionKey);
-      
+
       const password = new Password({
         userId: req.userId,
         title: row.Title,
@@ -187,11 +194,12 @@ router.post('/import/excel', auth, async (req, res) => {
       passwords.push(password);
     }
 
-    res.status(201).json({ 
-      message: 'Import successful', 
-      count: passwords.length 
+    res.status(201).json({
+      message: 'Import successful',
+      count: passwords.length
     });
   } catch (error) {
+    console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: 'Import failed' });
   }
 });

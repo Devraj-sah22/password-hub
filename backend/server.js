@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const session = require('express-session');
 const passport = require('passport');
+const fileUpload = require('express-fileupload'); // ADD THIS
 const authRoutes = require('./routes/auth');
 const passwordRoutes = require('./routes/passwords');
 const userRoutes = require('./routes/users');
@@ -22,6 +23,10 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(fileUpload({
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  abortOnLimit: true
+})); // ADD THIS
 
 // Session configuration
 app.use(session({
@@ -44,8 +49,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/password-
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
 app.use('/api/auth', authRoutes);
