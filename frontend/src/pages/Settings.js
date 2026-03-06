@@ -28,6 +28,9 @@ const Settings = () => {
     autoLock: '5',
     theme: 'dark'
   });
+  const [qrCode, setQrCode] = useState(null);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [twoFAToken, setTwoFAToken] = useState("");
   // Apply theme change
   const changeTheme = (mode) => {
     setSettings(prev => ({ ...prev, theme: mode }));
@@ -58,6 +61,29 @@ const Settings = () => {
     else if (savedTheme === "light") {
       document.documentElement.classList.remove("dark");
     }
+  }, []);
+  /* ADD THIS NEW useEffect BELOW */
+  useEffect(() => {
+
+    const fetchUserProfile = async () => {
+      try {
+
+        const res = await axios.get("http://localhost:5000/api/users/profile");
+
+        setSettings(prev => ({
+          ...prev,
+          email: res.data.email,
+          name: res.data.name,
+          twoFactor: res.data.twoFactorEnabled
+        }));
+
+      } catch (error) {
+        console.error("Failed to load profile");
+      }
+    };
+
+    fetchUserProfile();
+
   }, []);
 
   const handleChange = (e) => {
@@ -115,6 +141,58 @@ const Settings = () => {
       window.location.reload();
     } catch (error) {
       toast.error("Import failed");
+    }
+  };
+  const enable2FA = async () => {
+    try {
+
+      const res = await axios.post("http://localhost:5000/api/users/2fa/enable");
+
+      setQrCode(res.data.qr);
+      setShow2FASetup(true);
+
+      toast.success("Scan QR code using Google Authenticator");
+
+    } catch (error) {
+      toast.error("Failed to enable 2FA");
+    }
+  };
+  const verify2FA = async () => {
+    try {
+
+      await axios.post("http://localhost:5000/api/users/2fa/verify", {
+        token: twoFAToken
+      });
+
+      toast.success("2FA enabled successfully");
+
+      setShow2FASetup(false);
+      // ADD THIS
+      setSettings(prev => ({
+        ...prev,
+        twoFactor: true
+      }));
+
+    } catch (error) {
+      toast.error("Invalid verification code");
+    }
+  };
+
+  // ADD THIS FUNCTION RIGHT HERE
+  const disable2FA = async () => {
+    try {
+
+      await axios.post("http://localhost:5000/api/users/2fa/disable");
+
+      setSettings(prev => ({
+        ...prev,
+        twoFactor: false
+      }));
+
+      toast.success("2FA disabled successfully");
+
+    } catch (error) {
+      toast.error("Failed to disable 2FA");
     }
   };
 
@@ -182,12 +260,49 @@ const Settings = () => {
                     type="checkbox"
                     name="twoFactor"
                     checked={settings.twoFactor}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      //handleChange(e);
+
+                      if (checked && !settings.twoFactor) {
+                        enable2FA();
+                      }
+
+                      if (!checked && settings.twoFactor) {
+                        disable2FA();
+                      }
+                    }}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
+              {show2FASetup && (
+                <div className="p-4 bg-gray-700/30 rounded-lg mt-4">
+
+                  <p className="text-white mb-3">
+                    Scan this QR Code using Google Authenticator
+                  </p>
+
+                  <img src={qrCode} alt="2FA QR" className="w-40 mb-4" />
+
+                  <input
+                    type="text"
+                    placeholder="Enter 6 digit code"
+                    value={twoFAToken}
+                    onChange={(e) => setTwoFAToken(e.target.value)}
+                    className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                  />
+
+                  <button
+                    onClick={verify2FA}
+                    className="ml-3 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg"
+                  >
+                    Verify
+                  </button>
+
+                </div>
+              )}
 
               <div className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg">
                 <div className="flex items-center gap-3">

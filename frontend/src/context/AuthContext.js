@@ -33,6 +33,30 @@ export const AuthProvider = ({ children }) => {
       handleAuthSuccess(tokenParam);
       window.history.replaceState({}, document.title, '/');
     }
+    // ---------------- AUTO LOCK FEATURE ----------------
+
+    let timer;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+
+      timer = setTimeout(() => {
+        logout();
+      }, 5 * 60 * 1000); // 5 minutes
+    };
+
+    window.addEventListener("mousemove", resetTimer);
+    window.addEventListener("keypress", resetTimer);
+    window.addEventListener("click", resetTimer);
+
+    resetTimer();
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("mousemove", resetTimer);
+      window.removeEventListener("keypress", resetTimer);
+      window.removeEventListener("click", resetTimer);
+    };
   }, []);
 
   const handleAuthSuccess = (token) => {
@@ -61,7 +85,38 @@ export const AuthProvider = ({ children }) => {
         email,
         password
       });
+      /* ----------- 2FA CHECK ----------- */
 
+      if (response.data.twoFactorRequired) {
+
+        const code = prompt("Enter the 6-digit code from Google Authenticator");
+
+        if (!code) {
+          toast.error("2FA code required");
+          return;
+        }
+
+        const verifyRes = await axios.post('/api/auth/login/2fa', {
+          userId: response.data.userId,
+          token: code
+        });
+
+        const { token, user } = verifyRes.data;
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        axios.defaults.headers.common['x-auth-token'] = token;
+
+        setUser(user);
+
+        toast.success('Login successful');
+
+        navigate('/');
+
+        return;
+      }
+      /* -------- NORMAL LOGIN -------- */
       const { token, user } = response.data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
