@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -13,8 +13,32 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  //let timer;
+  const timerRef = useRef(null);
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['x-auth-token'];
+    setUser(null);
+    toast.success('Logged out successfully');
+    navigate('/login');
+  };
+
+  const startAutoLockTimer = () => {
+    clearTimeout(timerRef.current);
+
+    const autoLockTime = Number(localStorage.getItem("autoLock")) || 5;
+
+    timerRef.current = setTimeout(() => {
+      logout();
+    }, autoLockTime * 60 * 1000);
+  };
 
   useEffect(() => {
+    // SET DEFAULT AUTO LOCK IF NOT EXISTS
+    if (!localStorage.getItem("autoLock")) {
+      localStorage.setItem("autoLock", "5");
+    }
     const token = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
 
@@ -35,27 +59,38 @@ export const AuthProvider = ({ children }) => {
     }
     // ---------------- AUTO LOCK FEATURE ----------------
 
-    let timer;
+    /*let timer;
 
     const resetTimer = () => {
       clearTimeout(timer);
 
+      const autoLockTime = Number(localStorage.getItem("autoLock")) || 5;
+
       timer = setTimeout(() => {
         logout();
-      }, 5 * 60 * 1000); // 5 minutes
+      }, autoLockTime * 60 * 1000);
+    };*/
+    const resetTimer = () => {
+      startAutoLockTimer();
     };
 
     window.addEventListener("mousemove", resetTimer);
     window.addEventListener("keypress", resetTimer);
     window.addEventListener("click", resetTimer);
+    window.addEventListener("scroll", resetTimer);
+    window.addEventListener("touchstart", resetTimer);
+    window.addEventListener("focus", resetTimer);
 
-    resetTimer();
+    startAutoLockTimer();
 
     return () => {
-      clearTimeout(timer);
+      clearTimeout(timerRef.current);
       window.removeEventListener("mousemove", resetTimer);
       window.removeEventListener("keypress", resetTimer);
       window.removeEventListener("click", resetTimer);
+      window.removeEventListener("scroll", resetTimer);
+      window.removeEventListener("touchstart", resetTimer);
+      window.removeEventListener("focus", resetTimer);
     };
   }, []);
 
@@ -151,14 +186,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  /*const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete axios.defaults.headers.common['x-auth-token'];
     setUser(null);
     toast.success('Logged out successfully');
     navigate('/login');
-  };
+  };*/
 
   const value = {
     user,

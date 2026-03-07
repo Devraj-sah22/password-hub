@@ -25,7 +25,7 @@ const Settings = () => {
     name: user?.name || '',
     twoFactor: false,
     emailNotifications: true,
-    autoLock: '5',
+    autoLock: localStorage.getItem("autoLock") || '5',
     theme: 'dark'
   });
   const [qrCode, setQrCode] = useState(null);
@@ -324,7 +324,12 @@ const Settings = () => {
                 <select
                   name="autoLock"
                   value={settings.autoLock}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    handleChange(e);
+                    localStorage.setItem("autoLock", value);
+                    window.dispatchEvent(new Event("mousemove"));
+                  }}
                   className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
                 >
                   <option value="1">1 minute</option>
