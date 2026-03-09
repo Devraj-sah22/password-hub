@@ -40,6 +40,35 @@ router.get('/', auth, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+// Get single password by ID
+router.get('/:id', auth, async (req, res) => {
+  try {
+
+    const password = await Password.findOne({
+      _id: req.params.id,
+      userId: req.userId
+    });
+
+    if (!password) {
+      return res.status(404).json({ message: 'Password not found' });
+    }
+
+    const user = await User.findById(req.userId);
+
+    const pwdObj = password.toObject();
+
+    try {
+      pwdObj.decryptedPassword = decrypt(password.encryptedPassword, user.encryptionKey);
+    } catch (error) {
+      pwdObj.decryptedPassword = '***';
+    }
+
+    res.json(pwdObj);
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Add new password
 router.post('/', [

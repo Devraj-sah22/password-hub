@@ -26,6 +26,10 @@ const Passwords = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showPasswords, setShowPasswords] = useState({});
   const [loading, setLoading] = useState(true);
+  // ✅ ADD THESE
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editPassword, setEditPassword] = useState(null);
+  const [showPasswordInModal, setShowPasswordInModal] = useState(false);
 
   const categories = ['All', 'Social', 'Work', 'Personal', 'Finance', 'Other'];
 
@@ -52,7 +56,7 @@ const Passwords = () => {
     let filtered = passwords;
 
     if (searchTerm) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,18 +82,48 @@ const Passwords = () => {
       toast.error('Failed to delete password');
     }
   };
+  // ✅ ADD THIS
+  const handleEdit = (password) => {
+    setEditPassword({
+      ...password,
+      password: password.decryptedPassword || ""
+    });
+    setShowPasswordInModal(false); // reset visibility
+    setEditModalOpen(true);
+  };
 
   const handleToggleFavorite = async (id, favorite) => {
     try {
       await axios.put(`http://localhost:5000/api/passwords/${id}`, {
         favorite: !favorite
       });
-      setPasswords(passwords.map(p => 
+      setPasswords(passwords.map(p =>
         p._id === id ? { ...p, favorite: !favorite } : p
       ));
       toast.success(favorite ? 'Removed from favorites' : 'Added to favorites');
     } catch (error) {
       toast.error('Failed to update favorite');
+    }
+  };
+  // ✅ ADD THIS
+  const updatePassword = async () => {
+    try {
+
+      await axios.put(`http://localhost:5000/api/passwords/${editPassword._id}`, {
+        ...editPassword,
+        password: editPassword.password
+      });
+
+      toast.success("Password updated");
+
+      setPasswords(passwords.map(p =>
+        p._id === editPassword._id ? { ...p, ...editPassword } : p
+      ));
+
+      setEditModalOpen(false);
+
+    } catch (error) {
+      toast.error("Update failed");
     }
   };
 
@@ -181,9 +215,8 @@ const Passwords = () => {
                 </div>
                 <button
                   onClick={() => handleToggleFavorite(password._id, password.favorite)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    password.favorite ? 'text-yellow-400 hover:bg-yellow-400/10' : 'text-gray-400 hover:bg-gray-700'
-                  }`}
+                  className={`p-2 rounded-lg transition-colors ${password.favorite ? 'text-yellow-400 hover:bg-yellow-400/10' : 'text-gray-400 hover:bg-gray-700'
+                    }`}
                 >
                   <FiStar className={password.favorite ? 'fill-current' : ''} />
                 </button>
@@ -204,13 +237,13 @@ const Passwords = () => {
                       onClick={() => togglePasswordVisibility(password._id)}
                       className="p-1 hover:bg-gray-700 rounded transition-colors"
                     >
-                      {showPasswords[password._id] ? 
-                        <FiEyeOff className="text-gray-400" /> : 
+                      {showPasswords[password._id] ?
+                        <FiEyeOff className="text-gray-400" /> :
                         <FiEye className="text-gray-400" />
                       }
                     </button>
                     <CopyToClipboard
-                      text={showPasswords[password._id] ? password.decryptedPassword : '***'}
+                      text={password.decryptedPassword}
                       onCopy={() => toast.success('Password copied!')}
                     >
                       <button className="p-1 hover:bg-gray-700 rounded transition-colors">
@@ -239,12 +272,12 @@ const Passwords = () => {
                   {password.strength}
                 </span>
                 <div className="flex gap-2">
-                  <Link
-                    to={`/edit-password/${password._id}`}
+                  <button
+                    onClick={() => handleEdit(password)}
                     className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <FiEdit2 />
-                  </Link>
+                  </button>
                   <button
                     onClick={() => handleDelete(password._id)}
                     className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
@@ -267,6 +300,98 @@ const Passwords = () => {
                 <FiPlus />
                 Add New Password
               </Link>
+            </div>
+          )}
+          {editModalOpen && editPassword && (
+            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+              <div className="bg-gray-800 p-6 rounded-xl w-full max-w-md">
+
+                <h2 className="text-xl text-white mb-4">Edit Password</h2>
+
+                <div className="space-y-3">
+
+                  <input
+                    value={editPassword.title}
+                    onChange={(e) =>
+                      setEditPassword({ ...editPassword, title: e.target.value })
+                    }
+                    className="w-full p-2 bg-gray-700 text-white rounded"
+                    placeholder="Title"
+                  />
+
+                  <input
+                    value={editPassword.username}
+                    onChange={(e) =>
+                      setEditPassword({ ...editPassword, username: e.target.value })
+                    }
+                    className="w-full p-2 bg-gray-700 text-white rounded"
+                    placeholder="Username"
+                  />
+
+                  <div className="relative">
+                    <input
+                      type={showPasswordInModal ? "text" : "password"}
+                      value={editPassword.password}
+                      onChange={(e) =>
+                        setEditPassword({ ...editPassword, password: e.target.value })
+                      }
+                      className="w-full p-2 bg-gray-700 text-white rounded pr-10"
+                      placeholder="Password"
+                    />
+
+                    <button
+                      onClick={() => setShowPasswordInModal(!showPasswordInModal)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    >
+                      {showPasswordInModal ? "🙈" : "👁"}
+                    </button>
+                  </div>
+
+                  <input
+                    value={editPassword.website}
+                    onChange={(e) =>
+                      setEditPassword({ ...editPassword, website: e.target.value })
+                    }
+                    className="w-full p-2 bg-gray-700 text-white rounded"
+                    placeholder="Website"
+                  />
+                  <select
+                    value={editPassword.category || ""}
+                    onChange={(e) =>
+                      setEditPassword({ ...editPassword, category: e.target.value })
+                    }
+                    className="w-full p-2 bg-gray-700 text-white rounded"
+                  >
+                    <option value="">Select Category</option>
+                    <option value="Social">Social</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Other">Other</option>
+                  </select>
+
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+
+                  <button
+                    onClick={() => setEditModalOpen(false)}
+                    className="px-4 py-2 bg-gray-600 rounded"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={updatePassword}
+                    className="px-4 py-2 bg-blue-500 rounded"
+                  >
+                    Update
+                  </button>
+
+                </div>
+
+              </div>
             </div>
           )}
         </div>

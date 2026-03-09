@@ -10,13 +10,14 @@ import Passwords from './pages/Passwords';
 import AddPassword from './pages/AddPassword';
 import Settings from './pages/Settings';
 import './index.css';
+//import EditPassword from './pages/EditPassword';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 pb-16 md:pb-0 md:pt-16">
-          <Toaster 
+          <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
@@ -66,6 +67,15 @@ function App() {
                 </>
               </PrivateRoute>
             } />
+            {/* ✅ ADD THIS 
+            <Route path="/edit-password/:id" element={
+              <PrivateRoute>
+                <>
+                  <Navbar />
+                  <EditPassword />
+                </>
+              </PrivateRoute>
+            } />*/}
             <Route path="/settings" element={
               <PrivateRoute>
                 <>
