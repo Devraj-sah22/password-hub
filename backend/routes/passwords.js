@@ -6,6 +6,7 @@ const User = require('../models/User');
 const auth = require('../middleware/auth');
 const CryptoJS = require('crypto-js');
 const XLSX = require('xlsx');
+const crypto = require('crypto');   // ⭐ ADD THIS
 
 // Calculate password strength
 const calculateStrength = (password) => {
@@ -57,6 +58,33 @@ router.get('/', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
+});
+// Generate strong password
+router.get('/generate', auth, (req, res) => {
+  const length = parseInt(req.query.length) || 16;
+  const includeNumbers = req.query.numbers !== 'false';
+  const includeSymbols = req.query.symbols !== 'false';
+  const includeUppercase = req.query.uppercase !== 'false';
+  const includeLowercase = req.query.lowercase !== 'false';
+
+  let chars = '';
+  if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+  if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  if (includeNumbers) chars += '0123456789';
+  if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+  // if (!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
+  if (chars.length === 0) {
+    chars = 'abcdefghijklmnopqrstuvwxyz';
+  }
+
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars[crypto.randomInt(0, chars.length)];
+    //password += chars[Math.floor(Math.random() * chars.length)];
+  }
+
+  res.json({ password });
 });
 // Get single password by ID
 router.get('/:id', auth, async (req, res) => {
@@ -270,30 +298,6 @@ router.post('/import/excel', auth, async (req, res) => {
     console.error("IMPORT ERROR:", error);
     res.status(500).json({ message: 'Import failed' });
   }
-});
-
-// Generate strong password
-router.get('/generate', auth, (req, res) => {
-  const length = parseInt(req.query.length) || 16;
-  const includeNumbers = req.query.numbers !== 'false';
-  const includeSymbols = req.query.symbols !== 'false';
-  const includeUppercase = req.query.uppercase !== 'false';
-  const includeLowercase = req.query.lowercase !== 'false';
-
-  let chars = '';
-  if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
-  if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  if (includeNumbers) chars += '0123456789';
-  if (includeSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
-  if (!chars) chars = 'abcdefghijklmnopqrstuvwxyz';
-
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    password += chars[Math.floor(Math.random() * chars.length)];
-  }
-
-  res.json({ password });
 });
 
 module.exports = router;
