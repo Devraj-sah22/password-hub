@@ -7,6 +7,22 @@ const auth = require('../middleware/auth');
 const CryptoJS = require('crypto-js');
 const XLSX = require('xlsx');
 
+// Calculate password strength
+const calculateStrength = (password) => {
+  let score = 0;
+
+  if (!password) return "Weak";
+
+  if (password.length >= 8) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 2) return "Weak";
+  if (score === 3) return "Medium";
+  return "Strong";
+};
+
 // Encrypt password
 const encrypt = (text, key) => {
   return CryptoJS.AES.encrypt(text, key).toString();
@@ -21,8 +37,10 @@ const decrypt = (encryptedText, key) => {
 // Get all passwords
 router.get('/', auth, async (req, res) => {
   try {
+    /*const passwords = await Password.find({ userId: req.userId })
+      .sort({ favorite: -1, updatedAt: -1 });*/
     const passwords = await Password.find({ userId: req.userId })
-      .sort({ favorite: -1, updatedAt: -1 });
+      .sort({ createdAt: -1 });
 
     const user = await User.findById(req.userId);
     const decryptedPasswords = passwords.map(pwd => {
@@ -203,9 +221,28 @@ router.post('/import/excel', auth, async (req, res) => {
     const ws = wb.Sheets[wb.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(ws);
 
-    for (const row of data) {
-      const encryptedPassword = encrypt(row.Password, user.encryptionKey);
+    // for (const row of data) {
+    //   const encryptedPassword = encrypt(row.Password, user.encryptionKey);
 
+    //   const password = new Password({
+    //     userId: req.userId,
+    //     title: row.Title,
+    //     username: row.Username,
+    //     email: row.Email,
+    //     encryptedPassword,
+    //     website: row.Website,
+    //     category: row.Category || 'Other',
+    //     notes: row.Notes,
+    //     tags: row.Tags ? row.Tags.split(',').map(t => t.trim()) : [],
+    //     favorite: row.Favorite === 'Yes'
+    //   });
+    for (const row of data) {
+
+      const rawPassword = row.Password || "";
+
+      const encryptedPassword = encrypt(rawPassword, user.encryptionKey);
+
+      const strength = calculateStrength(rawPassword);
       const password = new Password({
         userId: req.userId,
         title: row.Title,
@@ -213,8 +250,10 @@ router.post('/import/excel', auth, async (req, res) => {
         email: row.Email,
         encryptedPassword,
         website: row.Website,
+        favicon: row.Website ? `https://www.google.com/s2/favicons?domain=${row.Website}` : null,
         category: row.Category || 'Other',
         notes: row.Notes,
+        strength: strength,   // ⭐ ADD THIS
         tags: row.Tags ? row.Tags.split(',').map(t => t.trim()) : [],
         favorite: row.Favorite === 'Yes'
       });

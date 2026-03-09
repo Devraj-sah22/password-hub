@@ -41,6 +41,16 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchPasswords();
+
+    const handleFocus = () => {
+      fetchPasswords();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   const fetchPasswords = async () => {
@@ -76,7 +86,7 @@ const Dashboard = () => {
       const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
         responseType: 'blob'
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -84,7 +94,7 @@ const Dashboard = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      
+
       toast.success('Passwords exported successfully!');
     } catch (error) {
       toast.error('Export failed');
@@ -146,6 +156,10 @@ const Dashboard = () => {
       borderWidth: 2
     }]
   };
+  //⭐ ADD THIS RIGHT HERE
+  const recentPasswords = [...passwords]
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 5);
 
   if (loading) {
     return (
@@ -292,7 +306,12 @@ const Dashboard = () => {
           </div>
 
           <div className="space-y-4">
-            {passwords.slice(0, 5).map((password) => (
+            {/* {passwords.slice(0, 5).map((password) => ( */}
+            {/* {passwords
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .slice(0, 5)
+              .map((password) => ( */}
+            {recentPasswords.map((password) => (
               <div
                 key={password._id}
                 className="flex items-center justify-between p-4 bg-gray-700/30 rounded-lg hover:bg-gray-700/50 transition-colors"
@@ -311,24 +330,35 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
+
+                  <span className="text-white font-mono text-sm">
+                    {showPasswords[password._id] ? password.decryptedPassword : "••••••••"}
+                  </span>
+
                   {password.favorite && <FiStar className="text-yellow-400" />}
+
                   <span className={`text-sm ${strengthColors[password.strength]}`}>
                     {password.strength}
                   </span>
+
                   <button
                     onClick={() => togglePasswordVisibility(password._id)}
                     className="p-2 hover:bg-gray-600 rounded-lg transition-colors"
                   >
-                    {showPasswords[password._id] ? <FiEyeOff className="text-gray-400" /> : <FiEye className="text-gray-400" />}
+                    {showPasswords[password._id]
+                      ? <FiEyeOff className="text-gray-400" />
+                      : <FiEye className="text-gray-400" />}
                   </button>
+
                   <CopyToClipboard
-                    text={showPasswords[password._id] ? password.decryptedPassword : '***'}
+                    text={password.decryptedPassword}
                     onCopy={() => toast.success('Password copied to clipboard!')}
                   >
                     <button className="p-2 hover:bg-gray-600 rounded-lg transition-colors">
                       <FiCopy className="text-gray-400" />
                     </button>
                   </CopyToClipboard>
+
                 </div>
               </div>
             ))}
