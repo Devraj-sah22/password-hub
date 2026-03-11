@@ -12,6 +12,8 @@ import Settings from './pages/Settings';
 import './index.css';
 import Recover2FA from './pages/Recover2FA'; // ⭐ ADD THIS
 import Reset2FA from './pages/Reset2FA';
+import ForgotPassword from './pages/ForgotPassword'; // ⭐ ADD
+import ResetPassword from './pages/ResetPassword'; // ⭐ ADD
 //import EditPassword from './pages/EditPassword';
 
 function App() {
@@ -48,6 +50,9 @@ function App() {
             {/* ⭐ ADD THIS ROUTE */}
             <Route path="/recover-2fa" element={<Recover2FA />} />
             <Route path="/reset-2fa/:token" element={<Reset2FA />} />
+            
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/" element={
               <PrivateRoute>
                 <>

@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: function() {
+    required: function () {
       return !this.googleId && !this.microsoftId && !this.githubId;
     }
   },
@@ -35,17 +35,21 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  twoFactorSecret: String
+  twoFactorSecret: String,
+
+  // ⭐ ADD HERE
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });
 
-userSchema.methods.comparePassword = async function(password) {
+userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 

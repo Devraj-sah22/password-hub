@@ -109,6 +109,83 @@ router.post('/recover-2fa', async (req, res) => {
     res.status(500).json({ message: "Recovery failed" });
   }
 });
+// Forgot Password - send reset email
+router.post("/forgot-password", async (req, res) => {
+
+  try {
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+    await user.save();
+
+    const resetLink = `http://localhost:3000/reset-password/${token}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `
+        <h2>Password Reset</h2>
+        <p>You requested to reset your password.</p>
+        <p>Click the link below to set a new password:</p>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>This link will expire in 1 hour.</p>
+      `
+    });
+
+    res.json({ message: "Password reset email sent" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Password reset failed" });
+  }
+
+});
+
+
+// Reset Password using token
+router.post("/reset-password/:token", async (req, res) => {
+
+  try {
+
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    // ⭐ ADD HERE
+    user.lastLogin = null;
+
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Password reset failed" });
+  }
+
+});
 
 // Local register
 router.post('/register', [

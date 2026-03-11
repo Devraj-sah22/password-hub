@@ -152,14 +152,29 @@ const Login = () => {
                 />
               </div>
             </div>
-            <div className="text-right">
+            <div className="flex justify-between text-sm">
+              <Link
+                to="/forgot-password"
+                className="text-blue-400 hover:text-blue-300"
+              >
+                Forgot Password?
+              </Link>
+
+              <Link
+                to="/recover-2fa"
+                className="text-blue-400 hover:text-blue-300"
+              >
+                Lost authenticator?
+              </Link>
+            </div>
+            {/* <div className="text-right">
               <Link
                 to="/recover-2fa"
                 className="text-blue-400 hover:text-blue-300 text-sm"
               >
                 Lost your authenticator?
               </Link>
-            </div>
+            </div> */}
             {/* <div className="text-right">
               <a
                 href="/recover-2fa"
