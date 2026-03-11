@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,8 +12,6 @@ const fileUpload = require('express-fileupload'); // ADD THIS
 const authRoutes = require('./routes/auth');
 const passwordRoutes = require('./routes/passwords');
 const userRoutes = require('./routes/users');
-
-dotenv.config();
 
 const app = express();
 

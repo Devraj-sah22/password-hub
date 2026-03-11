@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const crypto = require('crypto');
 const speakeasy = require('speakeasy');
+const transporter = require('../config/email');
 
 // Local login
 router.post('/login', [
@@ -66,6 +67,46 @@ router.post('/login', [
   } catch (error) {
     console.error("LOGIN ERROR:", error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+// Recover 2FA via email
+router.post('/recover-2fa', async (req, res) => {
+  try {
+
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET || 'your-jwt-secret',
+      { expiresIn: '10m' }
+    );
+
+    const recoveryLink = `http://localhost:3000/reset-2fa/${token}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "2FA Recovery Request",
+      html: `
+        <h2>Password Manager</h2>
+        <p>You requested to recover your 2FA access.</p>
+        <p>Click the link below to reset your 2FA.</p>
+        <a href="${recoveryLink}">${recoveryLink}</a>
+        <p>This link expires in 10 minutes.</p>
+      `
+    });
+
+    res.json({ message: "Recovery email sent" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Recovery failed" });
   }
 });
 
@@ -210,6 +251,38 @@ router.post('/login/2fa', async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "2FA login failed" });
+  }
+
+});
+// Reset 2FA using recovery link
+router.post('/reset-2fa/:token', async (req, res) => {
+
+  try {
+
+    const decoded = jwt.verify(
+      req.params.token,
+      process.env.JWT_SECRET || 'your-jwt-secret'
+    );
+
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.twoFactorEnabled = false;
+    user.twoFactorSecret = null;
+
+    await user.save();
+
+    res.json({ message: "2FA reset successfully" });
+
+  } catch (error) {
+
+    res.status(400).json({
+      message: "Invalid or expired recovery link"
+    });
+
   }
 
 });

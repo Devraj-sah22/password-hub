@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from "react-router-dom";
 import { FiMail, FiLock, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { SiMicrosoft } from 'react-icons/si';
@@ -70,7 +71,7 @@ const Login = () => {
               <FcGoogle className="text-xl" />
               Continue with Google
             </button>
-            
+
             <button
               onClick={() => handleOAuthLogin('microsoft')}
               className="w-full flex items-center justify-center gap-3 bg-[#2F2F2F] hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105"
@@ -78,7 +79,7 @@ const Login = () => {
               <SiMicrosoft className="text-xl text-blue-500" />
               Continue with Microsoft
             </button>
-            
+
             <button
               onClick={() => handleOAuthLogin('github')}
               className="w-full flex items-center justify-center gap-3 bg-[#24292e] hover:bg-[#2b3137] text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-105"
@@ -151,6 +152,22 @@ const Login = () => {
                 />
               </div>
             </div>
+            <div className="text-right">
+              <Link
+                to="/recover-2fa"
+                className="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                Lost your authenticator?
+              </Link>
+            </div>
+            {/* <div className="text-right">
+              <a
+                href="/recover-2fa"
+                className="text-blue-400 hover:text-blue-300 text-sm"
+              >
+                Lost your authenticator?
+              </a>
+            </div> */}
 
             <button
               type="submit"
