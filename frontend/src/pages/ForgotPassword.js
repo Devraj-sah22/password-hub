@@ -17,7 +17,8 @@ const ForgotPassword = () => {
     try {
 
       await axios.post(
-        "http://localhost:5000/api/auth/forgot-password",
+        //"http://localhost:5000/api/auth/forgot-password",
+        "https://password-hub-o450.onrender.com/api/auth/forgot-password",
         { email }
       );
 

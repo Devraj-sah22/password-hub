@@ -43,7 +43,8 @@ const Passwords = () => {
 
   const fetchPasswords = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/passwords');
+      //const response = await axios.get('http://localhost:5000/api/passwords');
+      const response = await axios.get('/api/passwords');
       setPasswords(response.data);
       setLoading(false);
     } catch (error) {
@@ -75,7 +76,8 @@ const Passwords = () => {
     if (!window.confirm('Are you sure you want to delete this password?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/passwords/${id}`);
+      //await axios.delete(`http://localhost:5000/api/passwords/${id}`);
+      await axios.delete(`/api/passwords/${id}`);
       setPasswords(passwords.filter(p => p._id !== id));
       toast.success('Password deleted successfully');
     } catch (error) {
@@ -94,7 +96,8 @@ const Passwords = () => {
 
   const handleToggleFavorite = async (id, favorite) => {
     try {
-      await axios.put(`http://localhost:5000/api/passwords/${id}`, {
+      //await axios.put(`http://localhost:5000/api/passwords/${id}`, {
+      await axios.put(`/api/passwords/${id}`, {
         favorite: !favorite
       });
       setPasswords(passwords.map(p =>
@@ -109,7 +112,8 @@ const Passwords = () => {
   const updatePassword = async () => {
     try {
 
-      await axios.put(`http://localhost:5000/api/passwords/${editPassword._id}`, {
+      //await axios.put(`http://localhost:5000/api/passwords/${editPassword._id}`, {
+      await axios.put(`/api/passwords/${editPassword._id}`, {
         ...editPassword,
         password: editPassword.password
       });

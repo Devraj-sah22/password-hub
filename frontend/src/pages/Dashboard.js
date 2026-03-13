@@ -55,7 +55,8 @@ const Dashboard = () => {
 
   const fetchPasswords = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/passwords');
+      //const response = await axios.get('http://localhost:5000/api/passwords');
+      const response = await axios.get('/api/passwords');
       setPasswords(response.data);
       calculateStats(response.data);
       setLoading(false);
@@ -83,7 +84,8 @@ const Dashboard = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
+      //const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
+      const response = await axios.get('/api/passwords/export/excel', {
         responseType: 'blob'
       });
 
@@ -107,7 +109,8 @@ const Dashboard = () => {
     formData.append('file', file);
 
     try {
-      await axios.post('http://localhost:5000/api/passwords/import/excel', formData, {
+      //await axios.post('http://localhost:5000/api/passwords/import/excel', formData, {
+      await axios.post('/api/passwords/import/excel', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       toast.success('Passwords imported successfully!');

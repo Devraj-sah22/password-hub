@@ -87,7 +87,8 @@ router.post('/recover-2fa', async (req, res) => {
       { expiresIn: '10m' }
     );
 
-    const recoveryLink = `http://localhost:3000/reset-2fa/${token}`;
+    // const recoveryLink = `http://localhost:3000/reset-2fa/${token}`;
+    const recoveryLink = `https://password-hub-five.vercel.app/reset-2fa/${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -129,7 +130,8 @@ router.post("/forgot-password", async (req, res) => {
 
     await user.save();
 
-    const resetLink = `http://localhost:3000/reset-password/${token}`;
+    // const resetLink = `http://localhost:3000/reset-password/${token}`;
+    const resetLink = `https://password-hub-five.vercel.app/reset-password/${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -246,7 +248,8 @@ router.get('/google/callback',
       process.env.JWT_SECRET || 'your-jwt-secret',
       { expiresIn: '7d' }
     );
-    res.redirect(`http://localhost:3000/?token=${token}`);
+    // res.redirect(`http://localhost:3000/?token=${token}`);
+    res.redirect(`https://password-hub-five.vercel.app/?token=${token}`);
   }
 );
 
@@ -261,7 +264,8 @@ router.get('/microsoft/callback',
       process.env.JWT_SECRET || 'your-jwt-secret',
       { expiresIn: '7d' }
     );
-    res.redirect(`http://localhost:3000/?token=${token}`);
+    // res.redirect(`http://localhost:3000/?token=${token}`);
+    res.redirect(`https://password-hub-five.vercel.app/?token=${token}`);
   }
 );
 
@@ -276,7 +280,8 @@ router.get('/github/callback',
       process.env.JWT_SECRET || 'your-jwt-secret',
       { expiresIn: '7d' }
     );
-    res.redirect(`http://localhost:3000/?token=${token}`);
+    // res.redirect(`http://localhost:3000/?token=${token}`);
+    res.redirect(`https://password-hub-five.vercel.app/?token=${token}`);
   }
 );
 // Verify 2FA during login

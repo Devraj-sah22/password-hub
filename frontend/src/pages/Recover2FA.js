@@ -10,7 +10,8 @@ const Recover2FA = () => {
     try {
 
       await axios.post(
-        "http://localhost:5000/api/auth/recover-2fa",
+        //"http://localhost:5000/api/auth/recover-2fa",
+        "https://password-hub-o450.onrender.com/api/auth/recover-2fa",
         { email }
       );
 

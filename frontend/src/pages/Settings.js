@@ -68,7 +68,8 @@ const Settings = () => {
     const fetchUserProfile = async () => {
       try {
 
-        const res = await axios.get("http://localhost:5000/api/users/profile");
+        //const res = await axios.get("http://localhost:5000/api/users/profile");
+        const res = await axios.get("/api/users/profile");
 
         setSettings(prev => ({
           ...prev,
@@ -101,7 +102,8 @@ const Settings = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
+      //const response = await axios.get('http://localhost:5000/api/passwords/export/excel', {
+      const response = await axios.get('/api/passwords/export/excel', {
         responseType: 'blob'
       });
 
@@ -128,7 +130,8 @@ const Settings = () => {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/passwords/import/excel",
+        //"http://localhost:5000/api/passwords/import/excel",
+        "/api/passwords/import/excel",
         formData,
         {
           headers: {
@@ -146,7 +149,8 @@ const Settings = () => {
   const enable2FA = async () => {
     try {
 
-      const res = await axios.post("http://localhost:5000/api/users/2fa/enable");
+      //const res = await axios.post("http://localhost:5000/api/users/2fa/enable");
+      const res = await axios.post("/api/users/2fa/enable");
 
       setQrCode(res.data.qr);
       setShow2FASetup(true);
@@ -160,7 +164,8 @@ const Settings = () => {
   const verify2FA = async () => {
     try {
 
-      await axios.post("http://localhost:5000/api/users/2fa/verify", {
+      //await axios.post("http://localhost:5000/api/users/2fa/verify", {
+      await axios.post("/api/users/2fa/verify", {
         token: twoFAToken
       });
 
@@ -182,7 +187,8 @@ const Settings = () => {
   const disable2FA = async () => {
     try {
 
-      await axios.post("http://localhost:5000/api/users/2fa/disable");
+      //await axios.post("http://localhost:5000/api/users/2fa/disable");
+      await axios.post("/api/users/2fa/disable");
 
       setSettings(prev => ({
         ...prev,

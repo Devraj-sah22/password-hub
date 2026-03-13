@@ -19,7 +19,11 @@ const app = express();
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  //origin: 'http://localhost:3000',
+  origin: [
+    "http://localhost:3000",
+    "https://password-hub-five.vercel.app"
+  ],
   credentials: true
 }));
 app.use(express.json());

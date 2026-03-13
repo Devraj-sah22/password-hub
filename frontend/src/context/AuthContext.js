@@ -3,7 +3,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-axios.defaults.baseURL = "http://localhost:5000";
+// axios.defaults.baseURL = "http://localhost:5000";
+//axios.defaults.baseURL = "https://password-hub-o450.onrender.com";
+axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 
 const AuthContext = createContext();
 

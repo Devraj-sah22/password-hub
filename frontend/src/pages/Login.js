@@ -37,7 +37,9 @@ const Login = () => {
   };
 
   const handleOAuthLogin = (provider) => {
-    window.location.href = `http://localhost:5000/api/auth/${provider}`;
+    //window.location.href = `http://localhost:5000/api/auth/${provider}`;
+    //window.location.href = `https://password-hub-o450.onrender.com/api/auth/${provider}`;
+    window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/${provider}`;
   };
 
   return (

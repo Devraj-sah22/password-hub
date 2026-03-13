@@ -37,7 +37,8 @@ const AddPassword = () => {
   const generatePassword = async () => {
     setGenerating(true);
     try {
-      const response = await axios.get('http://localhost:5000/api/passwords/generate', {
+      //const response = await axios.get('http://localhost:5000/api/passwords/generate', {
+      const response = await axios.get('/api/passwords/generate', {
         params: {
           length: 16,
           numbers: true,
@@ -72,9 +73,9 @@ const AddPassword = () => {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
-    
+
     setFormData(prev => ({ ...prev, [name]: newValue }));
-    
+
     if (name === 'password') {
       checkPasswordStrength(value);
     }
@@ -82,15 +83,16 @@ const AddPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const passwordData = {
         ...formData,
         strength: passwordStrength,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
       };
-      
-      await axios.post('http://localhost:5000/api/passwords', passwordData);
+
+      //await axios.post('http://localhost:5000/api/passwords', passwordData);
+      await axios.post('/api/passwords', passwordData);
       toast.success('Password added successfully!');
       navigate('/passwords');
     } catch (error) {
@@ -201,20 +203,19 @@ const AddPassword = () => {
                 <div className="mt-2">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full ${strengthColors[passwordStrength] || 'bg-gray-600'}`}
-                        style={{ 
-                          width: passwordStrength === 'Weak' ? '33%' : 
-                                 passwordStrength === 'Medium' ? '66%' : 
-                                 passwordStrength === 'Strong' ? '100%' : '0%' 
+                        style={{
+                          width: passwordStrength === 'Weak' ? '33%' :
+                            passwordStrength === 'Medium' ? '66%' :
+                              passwordStrength === 'Strong' ? '100%' : '0%'
                         }}
                       />
                     </div>
-                    <span className={`text-sm ${
-                      passwordStrength === 'Weak' ? 'text-red-400' :
+                    <span className={`text-sm ${passwordStrength === 'Weak' ? 'text-red-400' :
                       passwordStrength === 'Medium' ? 'text-yellow-400' :
-                      passwordStrength === 'Strong' ? 'text-green-400' : ''
-                    }`}>
+                        passwordStrength === 'Strong' ? 'text-green-400' : ''
+                      }`}>
                       {passwordStrength}
                     </span>
                   </div>

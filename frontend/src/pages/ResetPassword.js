@@ -20,7 +20,8 @@ const ResetPassword = () => {
     try {
 
       await axios.post(
-        `http://localhost:5000/api/auth/reset-password/${token}`,
+        //`http://localhost:5000/api/auth/reset-password/${token}`,
+        `https://password-hub-o450.onrender.com/api/auth/reset-password/${token}`,
         { password }
       );
 

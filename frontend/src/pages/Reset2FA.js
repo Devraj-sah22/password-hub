@@ -16,7 +16,8 @@ const Reset2FA = () => {
       try {
 
         await axios.post(
-          `http://localhost:5000/api/auth/reset-2fa/${token}`
+          //`http://localhost:5000/api/auth/reset-2fa/${token}`
+          `https://password-hub-o450.onrender.com/api/auth/reset-2fa/${token}`
         );
 
         toast.success("2FA reset successfully");
