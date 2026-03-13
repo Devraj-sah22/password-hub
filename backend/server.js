@@ -15,6 +15,9 @@ const userRoutes = require('./routes/users');
 
 const app = express();
 
+// ⭐ ADD THIS HERE
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 app.use(compression());
