@@ -11,7 +11,8 @@ const Recover2FA = () => {
 
       await axios.post(
         //"http://localhost:5000/api/auth/recover-2fa",
-        "https://password-hub-o450.onrender.com/api/auth/recover-2fa",
+        // "https://password-hub-o450.onrender.com/api/auth/recover-2fa",
+        `${process.env.REACT_APP_API_URL}/api/auth/recover-2fa`,
         { email }
       );
 
@@ -33,7 +34,7 @@ const Recover2FA = () => {
         type="email"
         placeholder="Enter your email"
         value={email}
-        onChange={(e)=>setEmail(e.target.value)}
+        onChange={(e) => setEmail(e.target.value)}
         className="p-2 bg-gray-800"
       />
 
