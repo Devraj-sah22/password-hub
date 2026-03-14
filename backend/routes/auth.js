@@ -254,7 +254,7 @@ router.get('/google/callback',
   }
 );
 
-// Microsoft OAuth routes
+/*// Microsoft OAuth routes
 router.get('/microsoft', passport.authenticate('microsoft'));
 
 router.get('/microsoft/callback',
@@ -266,6 +266,22 @@ router.get('/microsoft/callback',
       { expiresIn: '7d' }
     );
     // res.redirect(`http://localhost:3000/?token=${token}`);
+    res.redirect(`https://password-hub-five.vercel.app/?token=${token}`);
+  }
+);*/
+router.get('/microsoft',
+  passport.authenticate('microsoft', { scope: ['user.read'] })
+);
+
+router.get('/microsoft/callback',
+  passport.authenticate('microsoft', { failureRedirect: '/login' }),
+  (req, res) => {
+    const token = jwt.sign(
+      { userId: req.user._id, email: req.user.email },
+      process.env.JWT_SECRET || 'your-jwt-secret',
+      { expiresIn: '7d' }
+    );
+
     res.redirect(`https://password-hub-five.vercel.app/?token=${token}`);
   }
 );
