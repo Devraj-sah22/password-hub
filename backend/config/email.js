@@ -10,7 +10,7 @@ const nodemailer = require("nodemailer");
 
 // module.exports = transporter;
 
-const nodemailer = require("nodemailer");
+//const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
