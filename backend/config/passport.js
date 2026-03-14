@@ -62,7 +62,8 @@ module.exports = function (passport) {
   passport.use(new MicrosoftStrategy({
     clientID: process.env.MICROSOFT_CLIENT_ID,
     clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-    callbackURL: '/api/auth/microsoft/callback',
+    //callbackURL: '/api/auth/microsoft/callback',
+    callbackURL: "https://password-hub-o450.onrender.com/api/auth/microsoft/callback",
     scope: ['user.read']
   }, async (accessToken, refreshToken, profile, done) => {
     try {
