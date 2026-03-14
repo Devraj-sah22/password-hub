@@ -17,33 +17,19 @@ const app = express();
 
 // ⭐ ADD THIS HERE
 app.set('trust proxy', 1);
-// ✅ CORS CONFIGURATION (ADD HERE)
-const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "https://password-hub-five.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // handle preflight
 
 // Middleware
 app.use(helmet());
 app.use(compression());
-// app.use(cors({
-//   //origin: 'http://localhost:3000',
-//   origin: [
-//     "http://localhost:3000",
-//     "https://password-hub-five.vercel.app",
-//     "https://password-hub-five.vercel.app/"
-//   ],
-//   credentials: true
-// }));
-
+app.use(cors({
+  //origin: 'http://localhost:3000',
+  origin: [
+    "http://localhost:3000",
+    "https://password-hub-five.vercel.app",
+    "https://password-hub-five.vercel.app/"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(fileUpload({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
