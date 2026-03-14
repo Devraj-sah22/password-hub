@@ -25,7 +25,7 @@ app.use(cors({
   //origin: 'http://localhost:3000',
   origin: [
     "http://localhost:3000",
-    "https://password-hub-five.vercel.app",,
+    "https://password-hub-five.vercel.app",
   ],
   credentials: true
 }));
@@ -58,6 +58,38 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/password-
 })
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
+
+// SMTP Debug Endpoint
+app.get('/api/debug-smtp', async (req, res) => {
+  const net = require('net');
+  const dns = require('dns').promises;
+
+  const testConn = (host, port) => new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(5000);
+    socket.on('connect', () => { socket.destroy(); resolve({ port, status: 'CONNECTED' }); });
+    socket.on('error', (err) => resolve({ port, status: 'FAILED', error: err.code }));
+    socket.on('timeout', () => { socket.destroy(); resolve({ port, status: 'TIMEOUT' }); });
+    socket.connect(port, host);
+  });
+
+  try {
+    const ipv4 = await dns.resolve4('smtp.gmail.com').catch(() => 'DNS Failed');
+    const p465 = await testConn('smtp.gmail.com', 465);
+    const p587 = await testConn('smtp.gmail.com', 587);
+
+    res.json({
+      resolved_ip: ipv4,
+      results: [p465, p587],
+      verdict: (p465.status === 'CONNECTED' || p587.status === 'CONNECTED') 
+        ? "Network is OPEN. Check your Nodemailer config/auth." 
+        : "Network is BLOCKED. Render is likely restricting SMTP ports."
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // Routes
 app.use('/api/auth', authRoutes);
