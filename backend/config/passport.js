@@ -99,26 +99,32 @@ module.exports = function (passport) {
   passport.use(new GithubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID,
     clientSecret: process.env.GITHUB_CLIENT_SECRET,
-    //callbackURL: '/api/auth/github/callback'
     callbackURL: "https://password-hub-o450.onrender.com/api/auth/github/callback"
   }, async (accessToken, refreshToken, profile, done) => {
     try {
+
+      const email =
+        profile.emails && profile.emails.length > 0
+          ? profile.emails[0].value
+          : `${profile.username}@github-oauth.com`;
+
       let user = await User.findOne({ githubId: profile.id });
 
       if (!user) {
-        user = await User.findOne({ email: profile.emails[0].value });
+        user = await User.findOne({ email });
 
         if (user) {
           user.githubId = profile.id;
-          user.avatar = profile.photos[0].value;
+          user.avatar = profile.photos?.[0]?.value;
           await user.save();
         } else {
           const encryptionKey = crypto.randomBytes(32).toString('hex');
+
           user = await User.create({
             githubId: profile.id,
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            avatar: profile.photos[0].value,
+            email,
+            name: profile.displayName || profile.username,
+            avatar: profile.photos?.[0]?.value,
             encryptionKey
           });
         }
@@ -128,8 +134,45 @@ module.exports = function (passport) {
       await user.save();
 
       done(null, user);
+
     } catch (error) {
       done(error, null);
     }
   }));
+  // passport.use(new GithubStrategy({
+  //   clientID: process.env.GITHUB_CLIENT_ID,
+  //   clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  //   //callbackURL: '/api/auth/github/callback'
+  //   callbackURL: "https://password-hub-o450.onrender.com/api/auth/github/callback"
+  // }, async (accessToken, refreshToken, profile, done) => {
+  //   try {
+  //     let user = await User.findOne({ githubId: profile.id });
+
+  //     if (!user) {
+  //       user = await User.findOne({ email: profile.emails[0].value });
+
+  //       if (user) {
+  //         user.githubId = profile.id;
+  //         user.avatar = profile.photos[0].value;
+  //         await user.save();
+  //       } else {
+  //         const encryptionKey = crypto.randomBytes(32).toString('hex');
+  //         user = await User.create({
+  //           githubId: profile.id,
+  //           email: profile.emails[0].value,
+  //           name: profile.displayName,
+  //           avatar: profile.photos[0].value,
+  //           encryptionKey
+  //         });
+  //       }
+  //     }
+
+  //     user.lastLogin = Date.now();
+  //     await user.save();
+
+  //     done(null, user);
+  //   } catch (error) {
+  //     done(error, null);
+  //   }
+  // }));
 };
