@@ -88,7 +88,8 @@ router.post('/recover-2fa', async (req, res) => {
     );
 
     // const recoveryLink = `http://localhost:3000/reset-2fa/${token}`;
-    const recoveryLink = `https://password-hub-five.vercel.app/reset-2fa/${token}`;
+    //const recoveryLink = `https://password-hub-five.vercel.app/reset-2fa/${token}`;
+    const recoveryLink = `${process.env.FRONTEND_URL}/reset-2fa/${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
