@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
+const Password = require('../models/Password');
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
 // Get user profile
@@ -119,6 +120,32 @@ router.post('/2fa/disable', auth, async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: "Failed to disable 2FA" });
+  }
+});
+// Delete account permanently
+router.delete('/delete-account', auth, async (req, res) => {
+  try {
+
+    const userId = req.userId;
+
+    // delete all passwords of the user
+    await Password.deleteMany({ user: userId });
+
+    // delete user account
+    await User.findByIdAndDelete(userId);
+
+    res.json({
+      message: "Account deleted permanently"
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete account"
+    });
+
   }
 });
 

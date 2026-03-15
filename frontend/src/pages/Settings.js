@@ -201,6 +201,35 @@ const Settings = () => {
       toast.error("Failed to disable 2FA");
     }
   };
+  // ⭐ ADD THIS FUNCTION BELOW disable2FA
+  const deleteAccount = async () => {
+
+    const confirmText = prompt(
+      "⚠ This will permanently delete your account and all passwords.\n\nType DELETE to confirm."
+    );
+
+    if (confirmText !== "DELETE") {
+      toast.error("Deletion cancelled");
+      return;
+    }
+
+    try {
+
+      await axios.delete("/api/users/delete-account");
+
+      toast.success("Account deleted successfully");
+
+      localStorage.removeItem("token");
+
+      window.location.href = "/login";
+
+    } catch (error) {
+
+      toast.error("Failed to delete account");
+
+    }
+
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 p-6">
@@ -446,6 +475,13 @@ const Settings = () => {
             >
               <FiLogOut />
               Logout
+            </button>
+            {/* ⭐ ADD THIS BUTTON */}
+            <button
+              onClick={deleteAccount}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Delete Account
             </button>
           </div>
         </motion.div>
