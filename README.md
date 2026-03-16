@@ -165,7 +165,7 @@ Password-Hub
 ## 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/password-hub.git
+git clone https://github.com/Devraj-sah22/password-hub.git
 cd password-hub
 ```
 
